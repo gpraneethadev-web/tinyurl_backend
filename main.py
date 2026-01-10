@@ -4,8 +4,8 @@ import socket
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
 from cassandra_client import session
-from utils import generate_short_code
-from datetime import datetime
+from utils import generate_short_code, insert_to_db
+
 
 app = FastAPI()
 BASE_URL = "http://localhost:8000"
@@ -29,15 +29,8 @@ def shorten_url(long_url: str, expiry_days: int = 7):
 
     short_code = generate_short_code()
     ttl = expiry_days * 24 * 60 * 60
-
-    query = """
-    INSERT INTO short_urls (short_code, long_url, created_at)
-    VALUES (%s, %s, %s)
-    USING TTL %s
-    """
-
-    session.execute(query, (short_code, long_url, datetime.utcnow(), ttl))
-
+    insert_to_db(short_code)
+   
     return {"short_url": f"{BASE_URL}/{short_code}"}
 
 
