@@ -27,9 +27,9 @@ def shorten_url(long_url: str, expiry_days: int = 7):
     if not validators.url(long_url):
         raise HTTPException(status_code=400, detail="Invalid url")
 
-    short_code = generate_short_code()
+    short_code = generate_short_code(long_url, length=7)  # 7-character code
     ttl = expiry_days * 24 * 60 * 60
-    insert_to_db(short_code)
+    insert_to_db(short_code, long_url, ttl)
    
     return {"short_url": f"{BASE_URL}/{short_code}"}
 
